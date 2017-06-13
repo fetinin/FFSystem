@@ -23,14 +23,14 @@ class Statuses(enum.Enum):
     closed = 'closed'
 
 
-class User(db.Base):
+class User(db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
 
     registered_date = db.Column(db.Date(), default=func.now())
     login = db.Column(db.String(40), unique=True)
-    password = db.Column(db.String(100))
+    password = db.Column(db.String(255))
     role = db.Column(db.Enum(Roles), nullable=False)
     credit_card = db.Column(db.String(25), nullable=False)
     rating = db.Column(db.Float(precision=2), default=0)
@@ -64,7 +64,7 @@ class Project(db.Model):
         nullable=False,
     )
 
-    materials = db.relationship('project_materials')
+    materials = db.relationship('ProjectMaterials')
 
 
 class ProjectMaterials(db.Model):
@@ -75,11 +75,7 @@ class ProjectMaterials(db.Model):
     file_name = db.Column(db.String(100), nullable=False)
     file_link = db.Column(db.String(255), nullable=False)
 
-    project_id = db.Column(
-        db.Integer(),
-        db.ForeignKey('project.id'),
-        nullable=False,
-    )
+    project = db.relationship('Project', back_populates='project_materials')
 
 
 class ProjectComments(db.Model):
@@ -87,7 +83,7 @@ class ProjectComments(db.Model):
 
     id = db.Column(db.Integer(), primary_key=True)
 
-    comment = db.Column(db.Text(255))
+    comment = db.Column(db.Text())
     crated_at = db.Column(db.DateTime(timezone=True), default=func.now())
     last_update = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
