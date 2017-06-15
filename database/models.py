@@ -64,7 +64,7 @@ class Project(db.Model):
         nullable=False,
     )
 
-    # materials = db.relationship('ProjectMaterials')
+    materials = db.relationship('ProjectMaterials')
 
 
 class ProjectMaterials(db.Model):
@@ -75,7 +75,7 @@ class ProjectMaterials(db.Model):
     file_name = db.Column(db.String(100), nullable=False)
     file_link = db.Column(db.String(255), nullable=False)
 
-    # project = db.relationship('Project', back_populates='project_materials')
+    project = db.relationship('Project', back_populates='project_materials')
 
 
 class ProjectComments(db.Model):
