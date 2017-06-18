@@ -1,50 +1,60 @@
-import enum
-
 from sqlalchemy.sql import func as sql_func
 
 from database import db
+from database import validators
+from database.enums import Roles, Statuses
+from database.validators import ValidatorMixin
 
 
-@enum.unique
-class Roles(enum.Enum):
-    admin = 'admin'
-    lancer = 'lancer'
-    employer = 'employer'
+class DBManager:
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def update(self, **kwargs):
+        self.update(**kwargs)
+        db.session.commit()
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 
-@enum.unique
-class Statuses(enum.Enum):
-    open = 'open'
-    in_progress = 'in_progress'
-    verification = 'verification'
-    on_rework = 'on_rework'
-    deploying = 'deploying'
-    waiting_payment = 'waiting_payment'
-    closed = 'closed'
-
-
-class User(db.Model):
+class User(DBManager, ValidatorMixin, db.Model):
     __tablename__ = 'user'
+    validators = {
+        'login': validators.name,
+        'password': validators.password,
+        'role': validators.role,
+        'credit_card': validators.credit_card,
+        'avatar_link': validators.link,
+    }
 
     id = db.Column(db.Integer, primary_key=True)
     date_registered = db.Column(db.Date, default=sql_func.now())
 
-    login = db.Column(db.String(40), unique=True)
+    login = db.Column(db.String(40), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.Enum(Roles), nullable=False)
     credit_card = db.Column(db.String(25), nullable=False)
-    rating = db.Column(db.Float(precision=2), default=0)
     avatar_link = db.Column(db.String(255))
 
 
-class Project(db.Model):
+class Project(DBManager, ValidatorMixin, db.Model):
     __tablename__ = 'project'
+    validators = {
+        'name': validators.name,
+        'description': validators.not_empty,
+        'price': validators.all_digits,
+        'due_to_date': validators.date_not_past,
+        'status': validators.project_status,
+    }
 
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=sql_func.now())
 
     name = db.Column(db.String(120), nullable=False)
-    description = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
     price = db.Column(db.Integer, nullable=False)
     due_to_date = db.Column(db.Date, nullable=False)
     status = db.Column(db.Enum(Statuses), default=Statuses.open)
@@ -64,8 +74,11 @@ class Project(db.Model):
     materials = db.relationship('ProjectMaterials')
 
 
-class ProjectMaterials(db.Model):
+class ProjectMaterials(DBManager, ValidatorMixin, db.Model):
     __tablename__ = 'project_materials'
+    validators = {
+        'file_link': validators.link,
+    }
 
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=sql_func.now())
@@ -82,8 +95,11 @@ class ProjectMaterials(db.Model):
     )
 
 
-class ProjectComments(db.Model):
+class ProjectComments(DBManager, ValidatorMixin, db.Model):
     __tablename__ = 'project_comments'
+    validators = {
+        'comment': validators.not_empty
+    }
 
     id = db.Column(db.Integer, primary_key=True)
     crated_at = db.Column(db.DateTime(timezone=True), default=sql_func.now())
