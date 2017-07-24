@@ -1,4 +1,6 @@
+from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy.sql import func as sql_func
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from database import db
 from database import validators
@@ -34,11 +36,22 @@ class User(DBManager, ValidatorMixin, db.Model):
     date_registered = db.Column(db.Date, default=sql_func.now())
 
     login = db.Column(db.String(40), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
+    _password_hash = db.Column(db.String(128), nullable=False)
     role = db.Column(db.Enum(Roles), nullable=False)
     credit_card = db.Column(db.String(25), nullable=False)
     avatar_link = db.Column(db.String(255))
     approved = db.Column(db.Boolean, nullable=False, default=False)
+
+    @hybrid_property
+    def hash_password(self):
+        return self._password_hash
+
+    @hash_password.setter
+    def hash_password(self, password):
+        self._password_hash = pwd_context.encrypt(password)
+
+    def verify_password(self, password):
+        return pwd_context.verify(password, self.password_hash)
 
 
 class Project(DBManager, ValidatorMixin, db.Model):
