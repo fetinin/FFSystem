@@ -44,28 +44,28 @@ class ValidatorMixin:
             raise AttributeError(msg)
 
 
-def name(value: str) -> (bool, str):
+def is_name(value: str) -> (bool, str):
     if re.compile(r"^[a-zA-Z0-9_-]{3,40}$").match(value):
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "Name should contain only letters, numbers or _."
 
 
-def email(value: str) -> (bool, str):
+def is_email(value: str) -> (bool, str):
     if re.compile(r'^[\S]+@[\S]+\.[\S]+$').match(value):
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "Invalid email address."
 
 
-def password(value: str) -> (bool, str):
+def is_password(value: str) -> (bool, str):
     if len(value) >= 3:
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "Password should be at least 3 characters long."
 
 
-def role(value: str) -> (bool, str):
+def is_role(value: str) -> (bool, str):
     possible_roles = [role.value for role in Roles]
     if value in possible_roles:
         return True, SUCCESS_VALIDATION_MSG
@@ -74,7 +74,7 @@ def role(value: str) -> (bool, str):
         return False, f"Role should be one of these: {roll_choices}"
 
 
-def credit_card(value: str) -> (bool, str):
+def is_credit_card(value: str) -> (bool, str):
     def is_luhn_valid(card_number: str) -> bool:
         card_number = [int(i) for i in str(card_number)]
 
@@ -96,42 +96,42 @@ def credit_card(value: str) -> (bool, str):
                       "long and be valid."
 
 
-def link(value: str) -> (bool, str):
+def is_link(value: str) -> (bool, str):
     if value.startswith(("http", "/")):
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "Invalid link. Should start with http or '/'."
 
 
-def description(value: str) -> (bool, str):
+def is_description(value: str) -> (bool, str):
     if len(value) >= 10:
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "Description"
 
 
-def not_empty(value: str) -> (bool, str):
+def is_not_empty(value: str) -> (bool, str):
     if value:
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "Value shouldn't be empty."
 
 
-def all_digits(value: str) -> (bool, str):
+def are_all_digits(value: str) -> (bool, str):
     if all(s.isdigit() for s in value):
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "Price should contain only numbers."
 
 
-def date_not_past(value: date) -> (bool, str):
+def date_is_not_past(value: date) -> (bool, str):
     if value >= date.today():
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "You can't be from the past, so are dates."
 
 
-def project_status(value: str) -> (bool, str):
+def is_project_status(value: str) -> (bool, str):
     possible_statuses = [role.value for role in Statuses]
     if value in possible_statuses:
         return True, SUCCESS_VALIDATION_MSG

@@ -23,11 +23,11 @@ class DBManager:
 class User(DBManager, ValidatorMixin, db.Model):
     __tablename__ = 'user'
     validators = {
-        'login': validators.name,
-        'password': validators.password,
-        'role': validators.role,
-        'credit_card': validators.credit_card,
-        'avatar_link': validators.link,
+        'login': validators.is_name,
+        'password': validators.is_password,
+        'role': validators.is_role,
+        'credit_card': validators.is_credit_card,
+        'avatar_link': validators.is_link,
     }
 
     id = db.Column(db.Integer, primary_key=True)
@@ -43,11 +43,11 @@ class User(DBManager, ValidatorMixin, db.Model):
 class Project(DBManager, ValidatorMixin, db.Model):
     __tablename__ = 'project'
     validators = {
-        'name': validators.name,
-        'description': validators.not_empty,
-        'price': validators.all_digits,
-        'due_to_date': validators.date_not_past,
-        'status': validators.project_status,
+        'name': validators.is_name,
+        'description': validators.is_not_empty,
+        'price': validators.are_all_digits,
+        'due_to_date': validators.date_is_not_past,
+        'status': validators.is_project_status,
     }
 
     id = db.Column(db.Integer, primary_key=True)
@@ -77,7 +77,7 @@ class Project(DBManager, ValidatorMixin, db.Model):
 class ProjectMaterials(DBManager, ValidatorMixin, db.Model):
     __tablename__ = 'project_materials'
     validators = {
-        'file_link': validators.link,
+        'file_link': validators.is_link,
     }
 
     id = db.Column(db.Integer, primary_key=True)
@@ -98,7 +98,7 @@ class ProjectMaterials(DBManager, ValidatorMixin, db.Model):
 class ProjectComments(DBManager, ValidatorMixin, db.Model):
     __tablename__ = 'project_comments'
     validators = {
-        'comment': validators.not_empty
+        'comment': validators.is_not_empty
     }
 
     id = db.Column(db.Integer, primary_key=True)
