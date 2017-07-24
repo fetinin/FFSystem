@@ -1,3 +1,5 @@
+import itsdangerous
+from itsdangerous import TimedJSONWebSignatureSerializer
 from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy.sql import func as sql_func
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -6,6 +8,7 @@ from database import db
 from database import validators
 from database.enums import Roles, Statuses
 from database.validators import ValidatorMixin
+from config import CONF
 
 
 class DBManager:
@@ -22,10 +25,10 @@ class DBManager:
         db.session.commit()
 
 
-class User(DBManager, ValidatorMixin, db.Model):
+class User(ValidatorMixin, DBManager, db.Model):
     __tablename__ = 'user'
     validators = {
-        'login': validators.is_name,
+        'username': validators.is_name,
         'password': validators.is_password,
         'role': validators.is_role,
         'credit_card': validators.is_credit_card,
@@ -35,23 +38,39 @@ class User(DBManager, ValidatorMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date_registered = db.Column(db.Date, default=sql_func.now())
 
-    login = db.Column(db.String(40), unique=True, nullable=False)
+    username = db.Column(db.String(40), unique=True, nullable=False)
     _password_hash = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.Enum(Roles), nullable=False)
+    role = db.Column(db.Enum(Roles), default=Roles.lancer.value)
     credit_card = db.Column(db.String(25), nullable=False)
     avatar_link = db.Column(db.String(255))
-    approved = db.Column(db.Boolean, nullable=False, default=False)
+    approved = db.Column(db.Boolean, default=False)
 
     @hybrid_property
-    def hash_password(self):
+    def password(self):
         return self._password_hash
 
-    @hash_password.setter
-    def hash_password(self, password):
+    @password.setter
+    def password(self, password):
         self._password_hash = pwd_context.encrypt(password)
 
     def verify_password(self, password):
-        return pwd_context.verify(password, self.password_hash)
+        return pwd_context.verify(password, self.password)
+
+    def generate_auth_token(self, expires_in=3600):
+        s = TimedJSONWebSignatureSerializer(CONF['SECRET_KEY'], expires_in)
+        return s.dumps({'id': self.id})
+
+    @classmethod
+    def get_by_auth_token(cls, token):
+        s = itsdangerous.TimedJSONWebSignatureSerializer(CONF['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except itsdangerous.SignatureExpired:
+            return None  # valid token, but expired
+        except itsdangerous.BadSignature:
+            return None  # invalid token
+        user = cls.query.get(data['id'])
+        return user
 
 
 class Project(DBManager, ValidatorMixin, db.Model):
