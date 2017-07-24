@@ -38,6 +38,7 @@ class User(DBManager, ValidatorMixin, db.Model):
     role = db.Column(db.Enum(Roles), nullable=False)
     credit_card = db.Column(db.String(25), nullable=False)
     avatar_link = db.Column(db.String(255))
+    approved = db.Column(db.Boolean, nullable=False, default=False)
 
 
 class Project(DBManager, ValidatorMixin, db.Model):
