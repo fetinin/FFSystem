@@ -9,13 +9,11 @@ SUCCESS_VALIDATION_MSG = "Everything's fine."
 class ValidatorMixin:
     validators = dict()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.validate()
-
     def __setattr__(self, key, value):
         validator = self.validators.get(key, None)
         if validator:
+            if not value and not self._attr_is_nullable(key):
+                raise AttributeError(f"{key} is required.")
             is_valid, msg = validator(value)
             if not is_valid:
                 raise AttributeError(msg)
@@ -24,24 +22,6 @@ class ValidatorMixin:
     @classmethod
     def _attr_is_nullable(cls, attr_name) -> bool:
         return getattr(cls, attr_name).property.columns[0].nullable
-
-    def validate(self) -> (bool, str):
-        is_valid, msg = True, SUCCESS_VALIDATION_MSG
-
-        for attr_name, validator in self.validators.items():
-            value = getattr(self, attr_name)
-            if not value and not self._attr_is_nullable(attr_name):
-                    is_valid, msg = False, f"{attr_name.title()} is required."
-                    break
-            elif value:
-                is_valid, msg = validator(value)
-                if not is_valid:
-                    break
-            else:
-                continue
-
-        if not is_valid:
-            raise AttributeError(msg)
 
 
 def is_name(value: str) -> (bool, str):
@@ -87,6 +67,9 @@ def is_credit_card(value: str) -> (bool, str):
                 card_number[index] -= 9
 
         return sum(card_number) % 10 == 0
+
+    if isinstance(value, int):
+        value = str(value)
 
     all_digits = all(l.isdigit() for l in value)
     if all_digits and len(value) >= 16 and is_luhn_valid(value):
