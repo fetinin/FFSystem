@@ -55,3 +55,4 @@ ENV/
 
 .idea/
 bots/tokens.py
+local_config.py

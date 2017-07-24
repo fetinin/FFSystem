@@ -1,5 +1,8 @@
 from flask import Flask
+from config import CONF
+
 app = Flask(__name__)
+app.config.update(CONF)
 
 
 @app.route('/')
