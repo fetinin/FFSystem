@@ -44,6 +44,15 @@ class User(ValidatorMixin, DBManager, db.Model):
     credit_card = db.Column(db.String(25), nullable=False)
     avatar_link = db.Column(db.String(255))
     approved = db.Column(db.Boolean, default=False)
+    deleted = db.Column(db.Boolean, default=False)
+
+    def to_dict(self):
+        return {
+            'username': self.username,
+            'role': self.role.value,
+            'credit_card': self.credit_card,
+            'avatar_link': self.avatar_link,
+                }
 
     @hybrid_property
     def password(self):
@@ -61,7 +70,7 @@ class User(ValidatorMixin, DBManager, db.Model):
         return s.dumps({'id': self.id})
 
     @classmethod
-    def get_by_auth_token(cls, token):
+    def verify_token(cls, token):
         s = itsdangerous.TimedJSONWebSignatureSerializer(CONF['SECRET_KEY'])
         try:
             data = s.loads(token)
@@ -69,8 +78,13 @@ class User(ValidatorMixin, DBManager, db.Model):
             return None  # valid token, but expired
         except itsdangerous.BadSignature:
             return None  # invalid token
-        user = cls.query.get(data['id'])
-        return user
+        return data
+
+    @classmethod
+    def get_by_auth_token(cls, token):
+        user_data = cls.verify_token(token)
+        if user_data:
+            return cls.query.get(user_data['id'])
 
 
 class Project(DBManager, ValidatorMixin, db.Model):

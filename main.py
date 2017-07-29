@@ -1,8 +1,11 @@
-from flask import request, jsonify, url_for, abort
+from flask import request, jsonify
+
+from database.enums import Roles
 from database.models import User
 
 from application import create_app
 from config import CONF
+from helpers import token_auth, role_required
 
 app = create_app(CONF)
 
@@ -13,7 +16,9 @@ def hello_world():
 
 
 @app.route('/api/users', methods=['POST'])
-def new_user():
+def create_user():
+    from database import db
+    db.create_all()
     json_data = request.get_json(silent=True) or {}
     username = json_data.get('username')
     password = json_data.get('password')
@@ -31,11 +36,21 @@ def new_user():
         )
     except AttributeError as err:
         return jsonify({'error': str(err)}), 400
-
     user.save()
+
     token = user.generate_auth_token().decode('utf-8')
 
     return jsonify({'username': user.username, 'token': token}), 201
+
+
+@app.route('/api/users', methods=['GET'])
+@token_auth
+@role_required(Roles.admin.value)
+def show_user(user):
+    users = User.query.filter_by(deleted=False)
+    users_as_dicts = [user.to_dict() for user in users]
+    return jsonify(users_as_dicts), 200
+
 
 if __name__ == '__main__':
     app.run()
