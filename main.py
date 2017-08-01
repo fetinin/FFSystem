@@ -12,13 +12,13 @@ app = create_app(CONF)
 
 @app.route('/')
 def hello_world():
+    from database import db
+    db.create_all()
     return 'Hello World!'
 
 
 @app.route('/api/users', methods=['POST'])
 def create_user():
-    from database import db
-    db.create_all()
     json_data = request.get_json(silent=True) or {}
     username = json_data.get('username')
     password = json_data.get('password')
