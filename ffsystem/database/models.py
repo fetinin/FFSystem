@@ -1,14 +1,14 @@
 import itsdangerous
+from ffsystem.database import db
+from ffsystem.database import validators
+from ffsystem.database.validators import ValidatorMixin
 from itsdangerous import TimedJSONWebSignatureSerializer
 from passlib.apps import custom_app_context as pwd_context
-from sqlalchemy.sql import func as sql_func
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import func as sql_func
 
-from database import db
-from database import validators
-from database.enums import Roles, Statuses
-from database.validators import ValidatorMixin
-from config import CONF
+from ffsystem.config import CONF
+from ffsystem.database.enums import Roles, Statuses
 
 
 class DBManager:

@@ -2,7 +2,7 @@ import os
 from collections import ChainMap
 
 try:
-    from local_config import CONFIG as LOCAL_CONF
+    from ffsystem.local_config import CONFIG as LOCAL_CONF
 except ImportError:
     LOCAL_CONF = {}
 

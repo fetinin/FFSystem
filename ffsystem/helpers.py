@@ -1,7 +1,8 @@
 import functools
+
 from flask import request, jsonify
 
-from database.models import User
+from ffsystem.database.models import User
 
 
 def token_auth(func):

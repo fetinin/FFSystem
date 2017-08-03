@@ -1,11 +1,19 @@
 from uuid import uuid4
+from time import sleep
+import logging
 
 import docker as libdocker
 import pytest
+from ffsystem.application import create_app
 
-from application import create_app
-from config import CONF
-from database import db as database
+from ffsystem.config import CONF
+from ffsystem.database import db as database
+
+LOG_FORMAT = "\n[%(levelname)s]%(asctime)s %(funcName)s: %(message)s"
+TIME_FORMAT = "%H:%M:%S"
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT, datefmt=TIME_FORMAT)
+
+logger = logging.getLogger(__name__)
 
 db_settings = {
     'POSTGRES_USER': 'docker',
@@ -31,7 +39,11 @@ def db_postgres():
         detach=True,
         environment=db_settings,
     )
+    # TODO: Wait container to become alive in other way.
+    logger.info("Created docker container.")
+    sleep(5)
     yield container
+    logger.info("Shutting down container.")
     container.stop()
     container.remove()
 

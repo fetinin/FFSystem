@@ -1,5 +1,6 @@
 from flask import Flask
-from database import db
+
+from ffsystem.database import db
 
 
 def create_app(conf: dict) -> Flask:

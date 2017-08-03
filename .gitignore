@@ -28,7 +28,7 @@ htmlcov/
 .tox/
 .coverage
 .coverage.*
-.cache
+/tests/.cache
 nosetests.xml
 coverage.xml
 *,cover
@@ -54,5 +54,5 @@ ENV/
 .ropeproject
 
 .idea/
-bots/tokens.py
-local_config.py
+ffsystem/bots/tokens.py
+ffsystem/local_config.py

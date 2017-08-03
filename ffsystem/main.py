@@ -1,18 +1,17 @@
+from ffsystem.application import create_app
+from ffsystem.database.models import User
 from flask import request, jsonify
+from ffsystem.helpers import token_auth, role_required
 
-from database.enums import Roles
-from database.models import User
-
-from application import create_app
-from config import CONF
-from helpers import token_auth, role_required
+from ffsystem.config import CONF
+from ffsystem.database.enums import Roles
 
 app = create_app(CONF)
 
 
 @app.route('/')
 def hello_world():
-    from database import db
+    from ffsystem.database import db
     db.create_all()
     return 'Hello World!'
 
