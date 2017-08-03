@@ -56,3 +56,4 @@ ENV/
 .idea/
 ffsystem/bots/tokens.py
 ffsystem/local_config.py
+.cache
