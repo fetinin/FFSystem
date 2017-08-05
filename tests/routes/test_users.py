@@ -1,8 +1,7 @@
-
 def test_create_user_no_credentials(client):
-    resp = client.post('/api/users/')
+    resp = client.post('/api/users/', json={'year': 1518})
     assert resp.status_code == 400
-    assert resp.json['message'] == 'Username and password are required.'
+    assert resp.json['message'] == 'The following items are not allowed: year'
 
 
 def test_create_user_with_credentials(client):
@@ -28,12 +27,3 @@ def test_create_user_with__invalid_credentials(client):
     assert resp.json['message'] == 'Credit card number should be at least 16' \
                                    ' digits long and be valid.'
 
-
-def test_get_token(client, user_lancer):
-    payload = {
-        'username': user_lancer.username,
-        'password': user_lancer.raw_password,
-    }
-    resp = client.get('/api/token/', json=payload)
-    assert resp.status_code == 200
-    assert 'token' in resp.json

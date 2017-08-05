@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask, jsonify
 from werkzeug.exceptions import HTTPException
 
@@ -6,6 +8,8 @@ from ffsystem.database import db
 from ffsystem.routes import blueprints
 
 __all__ = ['create_app', 'make_json_app']
+
+logger = logging.getLogger(__name__)
 
 
 def create_app(conf: dict) -> Flask:
@@ -30,6 +34,7 @@ def make_json_app(config: dict) -> Flask:
     """
 
     def make_json_error(ex):
+        logger.exception("Exception: ")
         if isinstance(ex, HTTPException):
             msg = ex.description
             err_type = ex.name

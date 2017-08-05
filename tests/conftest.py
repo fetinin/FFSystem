@@ -97,7 +97,7 @@ def client(flask_app):
         yield client
 
 
-@pytest.yield_fixture()
+@pytest.yield_fixture(scope='session')
 def user_lancer():
     user = User(
         username='test_user',
@@ -108,13 +108,13 @@ def user_lancer():
     user.token = user.generate_auth_token()
     user.raw_password = 'password'
     yield user
-    user.delete()
+    # user.delete()
 
 
-@pytest.yield_fixture()
+@pytest.yield_fixture(scope='session')
 def user_admin():
     user = User(
-        username='test_user',
+        username='test_admin',
         password='password',
         credit_card='4532954356226826',
         role=Roles.admin.value,
@@ -123,4 +123,19 @@ def user_admin():
     user.token = user.generate_auth_token()
     user.raw_password = 'password'
     yield user
-    user.delete()
+    # user.delete()
+
+
+@pytest.yield_fixture(scope='session')
+def user_employer():
+    user = User(
+        username='test_employer',
+        password='password',
+        credit_card='4532954356226826',
+        role=Roles.employer.value,
+    )
+    user.save()
+    user.token = user.generate_auth_token()
+    user.raw_password = 'password'
+    yield user
+    # user.delete()

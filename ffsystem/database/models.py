@@ -1,28 +1,31 @@
 import itsdangerous
-from ffsystem.database import db
-from ffsystem.database import validators
-from ffsystem.database.validators import ValidatorMixin
 from itsdangerous import TimedJSONWebSignatureSerializer
 from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import func as sql_func
 
 from ffsystem.config import CONF
+from ffsystem.database import db
+from ffsystem.database import validators
 from ffsystem.database.enums import Roles, Statuses
+from ffsystem.database.validators import ValidatorMixin
 
 
 class DBManager:
     def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+        session = db.create_scoped_session()
+        session.delete(self)
+        session.commit()
 
     def update(self, **kwargs):
+        session = db.create_scoped_session()
         self.update(**kwargs)
-        db.session.commit()
+        session.commit()
 
     def save(self):
-        db.session.add(self)
-        db.session.commit()
+        session = db.create_scoped_session()
+        session.add(self)
+        session.commit()
 
 
 class User(ValidatorMixin, DBManager, db.Model):
@@ -50,9 +53,9 @@ class User(ValidatorMixin, DBManager, db.Model):
         return {
             'username': self.username,
             'role': self.role.value,
-            'credit_card': self.credit_card,
-            'avatar_link': self.avatar_link,
-                }
+            'creditCard': self.credit_card,
+            'avatarLink': self.avatar_link,
+        }
 
     @hybrid_property
     def password(self):
@@ -104,12 +107,12 @@ class Project(DBManager, ValidatorMixin, db.Model):
     description = db.Column(db.Text, nullable=False)
     price = db.Column(db.Integer, nullable=False)
     due_to_date = db.Column(db.Date, nullable=False)
-    status = db.Column(db.Enum(Statuses), default=Statuses.open)
+    status = db.Column(db.Enum(Statuses), default=Statuses.open.value)
 
     lancer_id = db.Column(
         db.Integer,
         db.ForeignKey('user.id'),
-        nullable=False,
+        nullable=True,
     )
     employer_id = db.Column(
         db.Integer,
@@ -119,6 +122,18 @@ class Project(DBManager, ValidatorMixin, db.Model):
 
     comments = db.relationship('ProjectComments')
     materials = db.relationship('ProjectMaterials')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'price': self.price,
+            'dueToDate': str(self.due_to_date),
+            'status': self.status.value,
+            'lancerId': self.lancer_id,
+            'employerID': self.employer_id,
+        }
 
 
 class ProjectMaterials(DBManager, ValidatorMixin, db.Model):

@@ -1,5 +1,5 @@
 import re
-from datetime import date
+import datetime
 
 from ffsystem.database.enums import Roles, Statuses
 
@@ -101,14 +101,21 @@ def is_not_empty(value: str) -> (bool, str):
 
 
 def are_all_digits(value: str) -> (bool, str):
+    if isinstance(value, int):
+        value = str(value)
     if all(s.isdigit() for s in value):
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "Price should contain only numbers."
 
 
-def date_is_not_past(value: date) -> (bool, str):
-    if value >= date.today():
+def date_is_not_past(value: str) -> (bool, str):
+    try:
+        date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
+    except ValueError:
+        return False, "Invalid format. %Y-%M-%d expected."
+
+    if date >= datetime.date.today():
         return True, SUCCESS_VALIDATION_MSG
     else:
         return False, "You can't be from the past, so are dates."

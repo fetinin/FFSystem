@@ -1,30 +1,24 @@
-from flask import request, jsonify, Blueprint
+from flask import jsonify, Blueprint
+from werkzeug.exceptions import BadRequest, NotFound
 
 from ffsystem.database.enums import Roles
 from ffsystem.database.models import User
-from ffsystem.helpers import token_auth, role_required
-from werkzeug.exceptions import BadRequest, NotFound
+from ffsystem.helpers import token_auth, role_required, extract_json
 
 users_bp = Blueprint('users', __name__, url_prefix='/api/users')
 
 
 @users_bp.route('/', methods=['POST'])
-def create_user():
-    json_data = request.get_json(silent=True) or {}
+@extract_json(allowed_keys={'username', 'password', 'credit_card'})
+def create_user(json_data):
     username = json_data.get('username')
     password = json_data.get('password')
-    credit_card = json_data.get('creditCard',)
-
-    if username is None or password is None:
+    if password is None or username is None:
         raise BadRequest('Username and password are required.')
     if User.query.filter_by(username=username).first() is not None:
         raise BadRequest(f'User {username} already exist.')
     try:
-        user = User(
-            username=username,
-            password=password,
-            credit_card=credit_card,
-        )
+        user = User(**json_data)
     except AttributeError as err:
         raise BadRequest(str(err))
     user.save()
@@ -36,8 +30,8 @@ def create_user():
 @users_bp.route('/', methods=['GET'])
 @token_auth
 @role_required(Roles.admin.value)
-def list_users(user):
-    users = User.query.filter_by(deleted=False)
+def list_users():
+    users = User.query.filter_by(deleted=False).all()
     users_as_dicts = [user.to_dict() for user in users]
     return jsonify(users_as_dicts), 200
 
@@ -45,7 +39,7 @@ def list_users(user):
 @users_bp.route('/<int:user_id>', methods=['GET'])
 @token_auth
 @role_required(Roles.admin.value)
-def get_user(user, user_id):
+def get_user(user_id):
     user = User.qeury.filter_by(id=user_id)
     if user:
         return jsonify(user.to_dict()), 200
