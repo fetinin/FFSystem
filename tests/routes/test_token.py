@@ -1,8 +1,8 @@
 
 def test_create_user_no_credentials(client):
-    resp = client.post('/api/users/')
+    resp = client.post('/api/users/', json={'year': 1518})
     assert resp.status_code == 400
-    assert resp.json['message'] == 'Username and password are required.'
+    assert resp.json['message'] == 'The following items are not allowed: year'
 
 
 def test_create_user_with_credentials(client):
