@@ -13,6 +13,8 @@ import json
 from ffsystem.application import json_app as app
 from ffsystem.config import CONF
 from ffsystem.database import db as database
+from ffsystem.database.enums import Roles
+from ffsystem.database.models import User
 
 LOG_FORMAT = "\n[%(levelname)s]%(asctime)s %(funcName)s: %(message)s"
 TIME_FORMAT = "%H:%M:%S"
@@ -93,3 +95,32 @@ def client(flask_app):
     """
     with flask_app.test_client() as client:
         yield client
+
+
+@pytest.yield_fixture()
+def user_lancer():
+    user = User(
+        username='test_user',
+        password='password',
+        credit_card='4532954356226826'
+    )
+    user.save()
+    user.token = user.generate_auth_token()
+    user.raw_password = 'password'
+    yield user
+    user.delete()
+
+
+@pytest.yield_fixture()
+def user_admin():
+    user = User(
+        username='test_user',
+        password='password',
+        credit_card='4532954356226826',
+        role=Roles.admin.value,
+    )
+    user.save()
+    user.token = user.generate_auth_token()
+    user.raw_password = 'password'
+    yield user
+    user.delete()

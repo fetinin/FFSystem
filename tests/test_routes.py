@@ -27,3 +27,13 @@ def test_create_user_with__invalid_credentials(client):
     assert resp.status_code == 400
     assert resp.json['message'] == 'Credit card number should be at least 16' \
                                    ' digits long and be valid.'
+
+
+def test_get_token(client, user_lancer):
+    payload = {
+        'username': user_lancer.username,
+        'password': user_lancer.raw_password,
+    }
+    resp = client.get('/api/token/', json=payload)
+    assert resp.status_code == 200
+    assert 'token' in resp.json

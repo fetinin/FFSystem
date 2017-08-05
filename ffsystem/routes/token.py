@@ -10,7 +10,7 @@ def get_token():
     json_data = request.get_json(silent=True) or {}
     username = json_data.get('username')
     password = json_data.get('password')
-    user = User.query.filter_by(username=username)
+    user = User.query.filter_by(username=username).first()
 
     if user.verify_password(password):
         return jsonify({'token': user.generate_auth_token()}), 200
