@@ -3,7 +3,7 @@ from flask import request, jsonify, Blueprint
 from ffsystem.database.enums import Roles
 from ffsystem.database.models import User
 from ffsystem.helpers import token_auth, role_required
-
+from werkzeug.exceptions import BadRequest, NotFound
 
 users_bp = Blueprint('users', __name__, url_prefix='/api/users')
 
@@ -16,9 +16,9 @@ def create_user():
     credit_card = json_data.get('creditCard',)
 
     if username is None or password is None:
-        return jsonify({'error': 'Username and password are required.'}), 400
+        raise BadRequest('Username and password are required.')
     if User.query.filter_by(username=username).first() is not None:
-        return jsonify({'error': f'User {username} already exist.'}), 400
+        raise BadRequest(f'User {username} already exist.')
     try:
         user = User(
             username=username,
@@ -26,11 +26,10 @@ def create_user():
             credit_card=credit_card,
         )
     except AttributeError as err:
-        return jsonify({'error': str(err)}), 400
+        raise BadRequest(str(err))
     user.save()
 
-    token = user.generate_auth_token().decode('utf-8')
-
+    token = user.generate_auth_token()
     return jsonify({'username': user.username, 'token': token}), 201
 
 
@@ -41,3 +40,14 @@ def list_users(user):
     users = User.query.filter_by(deleted=False)
     users_as_dicts = [user.to_dict() for user in users]
     return jsonify(users_as_dicts), 200
+
+
+@users_bp.route('/<int:user_id>', methods=['GET'])
+@token_auth
+@role_required(Roles.admin.value)
+def get_user(user, user_id):
+    user = User.qeury.filter_by(id=user_id)
+    if user:
+        return jsonify(user.to_dict()), 200
+    else:
+        raise NotFound('User not found.')

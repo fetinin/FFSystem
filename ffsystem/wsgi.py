@@ -1,4 +1,4 @@
-from ffsystem.application import app
+from ffsystem.application import json_app
 
 if __name__ == "__main__":
-    app.run()
+    json_app.run()

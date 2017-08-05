@@ -10,7 +10,7 @@ from flask.wrappers import Response
 from werkzeug.utils import cached_property
 import json
 
-from ffsystem.application import app
+from ffsystem.application import json_app as app
 from ffsystem.config import CONF
 from ffsystem.database import db as database
 

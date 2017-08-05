@@ -67,7 +67,7 @@ class User(ValidatorMixin, DBManager, db.Model):
 
     def generate_auth_token(self, expires_in=3600):
         s = TimedJSONWebSignatureSerializer(CONF['SECRET_KEY'], expires_in)
-        return s.dumps({'id': self.id})
+        return s.dumps({'id': self.id}).decode('utf-8')
 
     @classmethod
     def verify_token(cls, token):
