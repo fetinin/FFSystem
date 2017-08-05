@@ -1,22 +1,14 @@
-from ffsystem.application import create_app
+from flask import request, jsonify, Blueprint
+
+from ffsystem.database.enums import Roles
 from ffsystem.database.models import User
-from flask import request, jsonify
 from ffsystem.helpers import token_auth, role_required
 
-from ffsystem.config import CONF
-from ffsystem.database.enums import Roles
 
-app = create_app(CONF)
+users_bp = Blueprint('users', __name__, url_prefix='/api/users')
 
 
-@app.route('/')
-def hello_world():
-    from ffsystem.database import db
-    db.create_all()
-    return 'Hello World!'
-
-
-@app.route('/api/users', methods=['POST'])
+@users_bp.route('/', methods=['POST'])
 def create_user():
     json_data = request.get_json(silent=True) or {}
     username = json_data.get('username')
@@ -42,14 +34,10 @@ def create_user():
     return jsonify({'username': user.username, 'token': token}), 201
 
 
-@app.route('/api/users', methods=['GET'])
+@users_bp.route('/', methods=['GET'])
 @token_auth
 @role_required(Roles.admin.value)
 def show_user(user):
     users = User.query.filter_by(deleted=False)
     users_as_dicts = [user.to_dict() for user in users]
     return jsonify(users_as_dicts), 200
-
-
-if __name__ == '__main__':
-    app.run()

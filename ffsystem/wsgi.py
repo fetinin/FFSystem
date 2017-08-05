@@ -1,4 +1,4 @@
-from ffsystem.main import app
+from ffsystem.application import app
 
 if __name__ == "__main__":
     app.run()

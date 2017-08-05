@@ -1,8 +1,9 @@
-from ffsystem.main import hello_world
+import json
 
 
-def test_hello_route(flask_app):
-    with flask_app.app_context():
-        assert hello_world() == 'Hello World!'
-
-
+def test_create_user(client):
+    resp = client.post('/api/users/')
+    resp_json = json.loads(resp.data)
+    exp_resp = {'error': 'Username and password are required.'}
+    assert resp.status_code == 400
+    assert resp_json == exp_resp

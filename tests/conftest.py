@@ -1,11 +1,12 @@
-from uuid import uuid4
-from time import sleep
 import logging
+from time import sleep
+from uuid import uuid4
 
 import docker as libdocker
 import pytest
-from ffsystem.application import create_app
+from flask import request as flask_request
 
+from ffsystem.application import app
 from ffsystem.config import CONF
 from ffsystem.database import db as database
 
@@ -39,8 +40,8 @@ def db_postgres():
         detach=True,
         environment=db_settings,
     )
-    # TODO: Wait container to become alive in other way.
     logger.info("Created docker container.")
+    # TODO: Wait for container to become alive in other way.
     sleep(5)
     yield container
     logger.info("Shutting down container.")
@@ -48,12 +49,26 @@ def db_postgres():
     container.remove()
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.yield_fixture(scope='session', autouse=True)
 def flask_app(db_postgres):
-    return create_app(CONF)
-
-
-@pytest.fixture(scope='session', autouse=True)
-def create_db(flask_app):
-    with flask_app.app_context():
+    app.config.update(CONF)
+    app.testing = True
+    with app.app_context():
         database.create_all()
+        yield app
+
+
+@pytest.fixture(scope='function')
+def request():
+    return flask_request
+
+
+@pytest.yield_fixture
+def client(flask_app):
+    """
+    A Flask test client.
+    An instance of :class:`flask.testing.TestClient` by default.
+    (Thx to pytest-flask)
+    """
+    with flask_app.test_client() as client:
+        yield client
