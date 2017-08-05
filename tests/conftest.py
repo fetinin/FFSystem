@@ -5,6 +5,10 @@ from uuid import uuid4
 import docker as libdocker
 import pytest
 from flask import request as flask_request
+from flask.testing import FlaskClient
+from flask.wrappers import Response
+from werkzeug.utils import cached_property
+import json
 
 from ffsystem.application import app
 from ffsystem.config import CONF
@@ -27,6 +31,21 @@ db_settings = {
 CONF['SQLALCHEMY_DATABASE_URI'] = "postgresql://{POSTGRES_USER}:" \
                                   "{POSTGRES_PASSWORD}@{address}:{port}" \
                                   "/{POSTGRES_DB}".format(**db_settings)
+
+
+class JsonResponse(Response):
+
+    @cached_property
+    def json(self):
+        return json.loads(self.data)
+
+
+class JsonTestClient(FlaskClient):
+    def open(self, *args, **kwargs):
+        if 'json' in kwargs:
+            kwargs['data'] = json.dumps(kwargs.pop('json'))
+            kwargs['content_type'] = 'application/json'
+        return super().open(*args, **kwargs)
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -53,6 +72,8 @@ def db_postgres():
 def flask_app(db_postgres):
     app.config.update(CONF)
     app.testing = True
+    app.response_class = JsonResponse
+    app.test_client_class = JsonTestClient
     with app.app_context():
         database.create_all()
         yield app

@@ -13,7 +13,7 @@ def create_user():
     json_data = request.get_json(silent=True) or {}
     username = json_data.get('username')
     password = json_data.get('password')
-    credit_card = json_data.get('credit_card')
+    credit_card = json_data.get('creditCard',)
 
     if username is None or password is None:
         return jsonify({'error': 'Username and password are required.'}), 400
@@ -37,7 +37,7 @@ def create_user():
 @users_bp.route('/', methods=['GET'])
 @token_auth
 @role_required(Roles.admin.value)
-def show_user(user):
+def list_users(user):
     users = User.query.filter_by(deleted=False)
     users_as_dicts = [user.to_dict() for user in users]
     return jsonify(users_as_dicts), 200
