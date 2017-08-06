@@ -7,6 +7,7 @@ import pytest
 from flask import request as flask_request
 from flask.testing import FlaskClient
 from flask.wrappers import Response
+from sqlalchemy.exc import OperationalError
 from werkzeug.utils import cached_property
 import json
 
@@ -50,6 +51,17 @@ class JsonTestClient(FlaskClient):
         return super().open(*args, **kwargs)
 
 
+def wait_db_availability(db):
+    for _ in range(10):
+        try:
+            db.engine.execute('SELECT 1')
+        except OperationalError:
+            sleep(0.5)
+            continue
+        else:
+            return
+
+
 @pytest.yield_fixture(scope='session', autouse=True)
 def db_postgres():
     docker_client = libdocker.DockerClient()
@@ -62,8 +74,6 @@ def db_postgres():
         environment=db_settings,
     )
     logger.info("Created docker container.")
-    # TODO: Wait for container to become alive in other way.
-    sleep(5)
     yield container
     logger.info("Shutting down container.")
     container.stop()
@@ -77,6 +87,7 @@ def flask_app(db_postgres):
     app.response_class = JsonResponse
     app.test_client_class = JsonTestClient
     with app.app_context():
+        wait_db_availability(database)
         database.create_all()
         yield app
 
