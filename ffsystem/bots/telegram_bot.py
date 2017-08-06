@@ -1,6 +1,6 @@
 import telepot
 
-from ffsystem.bots import telegram_token
+from ffsystem.bots.settings import telegram_token
 
 CHAT_ID = '-155062201'
 
