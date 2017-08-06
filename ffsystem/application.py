@@ -34,13 +34,13 @@ def make_json_app(config: dict) -> Flask:
     """
 
     def make_json_error(ex):
-        logger.exception("Exception: ")
         if isinstance(ex, HTTPException):
             msg = ex.description
             err_type = ex.name
             err_code = ex.code
         else:
-            msg = "Undexpected error occured"
+            logger.exception("Exception: ")
+            msg = "Unexpected error occurred."
             err_type = "Exception"
             err_code = 500
         response = jsonify(message=msg, code=err_code, type=err_type)
