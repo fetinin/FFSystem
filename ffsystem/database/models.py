@@ -154,6 +154,15 @@ class ProjectMaterials(DBManager, ValidatorMixin, db.Model):
         nullable=False,
     )
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'createdAt': str(self.created_at),
+            'fileName': self.file_name,
+            'fileLink': self.file_link,
+            'projectId': self.project_fk,
+        }
+
 
 class ProjectComments(DBManager, ValidatorMixin, db.Model):
     __tablename__ = 'project_comments'

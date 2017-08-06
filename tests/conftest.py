@@ -1,4 +1,5 @@
 import logging
+import datetime
 from time import sleep
 from uuid import uuid4
 
@@ -15,7 +16,7 @@ from ffsystem.application import json_app as app
 from ffsystem.config import CONF
 from ffsystem.database import db as database
 from ffsystem.database.enums import Roles
-from ffsystem.database.models import User
+from ffsystem.database.models import User, Project
 
 LOG_FORMAT = "\n[%(levelname)s]%(asctime)s %(funcName)s: %(message)s"
 TIME_FORMAT = "%H:%M:%S"
@@ -52,11 +53,11 @@ class JsonTestClient(FlaskClient):
 
 
 def wait_db_availability(db):
-    for _ in range(10):
+    for _ in range(100):
         try:
             db.engine.execute('SELECT 1')
         except OperationalError:
-            sleep(0.5)
+            sleep(0.3)
             continue
         else:
             return
@@ -88,6 +89,7 @@ def flask_app(db_postgres):
     app.test_client_class = JsonTestClient
     with app.app_context():
         wait_db_availability(database)
+        logger.info("DB started.")
         database.create_all()
         yield app
 
@@ -153,3 +155,18 @@ def user_employer(flask_app):
         user.raw_password = 'password'
         yield user
         user.delete()
+
+
+@pytest.yield_fixture
+def project(flask_app):
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    with flask_app.app_context():
+        p = Project(
+            name="Project1",
+            description="Descriptione",
+            price=9999,
+            due_to_date=tomorrow.isoformat(),
+        )
+        p.save()
+        yield p
+        p.delete()

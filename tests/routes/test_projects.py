@@ -1,24 +1,7 @@
 import datetime
 
-import pytest
-
 from ffsystem.database.enums import Statuses
 from ffsystem.database.models import Project
-
-
-@pytest.yield_fixture
-def project(flask_app):
-    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-    with flask_app.app_context():
-        p = Project(
-            name="Project1",
-            description="Descriptione",
-            price=9999,
-            due_to_date=tomorrow.isoformat(),
-        )
-        p.save()
-        yield p
-        p.delete()
 
 
 def test_create_project(flask_app, client, user_employer, user_lancer):
