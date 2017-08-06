@@ -97,7 +97,7 @@ def client(flask_app):
         yield client
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.yield_fixture
 def user_lancer(flask_app):
     with flask_app.app_context():
         user = User(
@@ -112,7 +112,7 @@ def user_lancer(flask_app):
         user.delete()
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.yield_fixture
 def user_admin(flask_app):
     with flask_app.app_context():
         user = User(
@@ -128,7 +128,7 @@ def user_admin(flask_app):
         user.delete()
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.yield_fixture
 def user_employer(flask_app):
     with flask_app.app_context():
         user = User(

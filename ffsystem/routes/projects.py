@@ -16,7 +16,7 @@ allowed_project_keys = {
 @projects_bp.route('/', methods=['GET'])
 @token_auth
 def list_projects():
-    projects = Project.query().all()
+    projects = Project.query.all()
     projects_as_dicts = [p.to_dict() for p in projects]
     return jsonify(projects_as_dicts), 200
 
@@ -36,7 +36,7 @@ def create_project(json_data):
 @projects_bp.route('/<int:id>', methods=['GET'])
 @token_auth
 def get_project(id):
-    project = Project.query(id=id).first()
+    project = Project.query.filter_by(id=id).first()
     if project:
         return jsonify(project.to_dict()), 200
     else:
@@ -46,8 +46,8 @@ def get_project(id):
 @projects_bp.route('/<int:id>', methods=['PUT'])
 @token_auth
 @extract_json(allowed_keys=allowed_project_keys)
-def update_project(id, json_data):
-    project = Project.query(id=id).first()
+def update_project(json_data, id):
+    project = Project.query.filter_by(id=id).first()
     if not project:
         raise NotFound("Project not found.")
     else:
@@ -58,11 +58,11 @@ def update_project(id, json_data):
     return jsonify(project.to_dict()), 200
 
 
-@projects_bp.route('/<int:id>', methods=['GET'])
+@projects_bp.route('/<int:id>', methods=['DELETE'])
 @token_auth
 @role_required(Roles.admin.value)
 def delete_project(id):
-    project = Project.query(id=id).first()
+    project = Project.query.filter_by(id=id).first()
     if not project:
         raise NotFound("Project not found.")
     else:

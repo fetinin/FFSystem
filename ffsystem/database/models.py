@@ -17,7 +17,8 @@ class DBManager:
         db.session.commit()
 
     def update(self, **kwargs):
-        self.update(**kwargs)
+        for k, v in kwargs.items():
+            setattr(self, k, v)
         db.session.commit()
 
     def save(self):
