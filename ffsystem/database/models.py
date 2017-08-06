@@ -13,19 +13,16 @@ from ffsystem.database.validators import ValidatorMixin
 
 class DBManager:
     def delete(self):
-        session = db.create_scoped_session()
-        session.delete(self)
-        session.commit()
+        db.session.delete(self)
+        db.session.commit()
 
     def update(self, **kwargs):
-        session = db.create_scoped_session()
         self.update(**kwargs)
-        session.commit()
+        db.session.commit()
 
     def save(self):
-        session = db.create_scoped_session()
-        session.add(self)
-        session.commit()
+        db.session.add(self)
+        db.session.commit()
 
 
 class User(ValidatorMixin, DBManager, db.Model):
@@ -111,13 +108,13 @@ class Project(DBManager, ValidatorMixin, db.Model):
 
     lancer_id = db.Column(
         db.Integer,
-        db.ForeignKey('user.id'),
+        db.ForeignKey('user.id', ondelete='SET NULL', onupdate="CASCADE"),
         nullable=True,
     )
     employer_id = db.Column(
         db.Integer,
-        db.ForeignKey('user.id'),
-        nullable=False,
+        db.ForeignKey('user.id', ondelete='SET NULL', onupdate="CASCADE"),
+        nullable=True,
     )
 
     comments = db.relationship('ProjectComments')
@@ -152,7 +149,7 @@ class ProjectMaterials(DBManager, ValidatorMixin, db.Model):
 
     project_fk = db.Column(
         db.Integer,
-        db.ForeignKey('project.id'),
+        db.ForeignKey('project.id', ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
 
@@ -173,11 +170,11 @@ class ProjectComments(DBManager, ValidatorMixin, db.Model):
 
     project_fk = db.Column(
         db.Integer,
-        db.ForeignKey('project.id'),
+        db.ForeignKey('project.id', ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
     commentator_fk = db.Column(
         db.Integer,
-        db.ForeignKey('user.id'),
+        db.ForeignKey('user.id', ondelete="SET NULL", onupdate="CASCADE"),
         nullable=False,
     )

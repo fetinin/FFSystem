@@ -98,44 +98,47 @@ def client(flask_app):
 
 
 @pytest.yield_fixture(scope='session')
-def user_lancer():
-    user = User(
-        username='test_user',
-        password='password',
-        credit_card='4532954356226826'
-    )
-    user.save()
-    user.token = user.generate_auth_token()
-    user.raw_password = 'password'
-    yield user
-    # user.delete()
+def user_lancer(flask_app):
+    with flask_app.app_context():
+        user = User(
+            username='test_user',
+            password='password',
+            credit_card='4532954356226826'
+        )
+        user.save()
+        user.token = user.generate_auth_token()
+        user.raw_password = 'password'
+        yield user
+        user.delete()
 
 
 @pytest.yield_fixture(scope='session')
-def user_admin():
-    user = User(
-        username='test_admin',
-        password='password',
-        credit_card='4532954356226826',
-        role=Roles.admin.value,
-    )
-    user.save()
-    user.token = user.generate_auth_token()
-    user.raw_password = 'password'
-    yield user
-    # user.delete()
+def user_admin(flask_app):
+    with flask_app.app_context():
+        user = User(
+            username='test_admin',
+            password='password',
+            credit_card='4532954356226826',
+            role=Roles.admin.value,
+        )
+        user.save()
+        user.token = user.generate_auth_token()
+        user.raw_password = 'password'
+        yield user
+        user.delete()
 
 
 @pytest.yield_fixture(scope='session')
-def user_employer():
-    user = User(
-        username='test_employer',
-        password='password',
-        credit_card='4532954356226826',
-        role=Roles.employer.value,
-    )
-    user.save()
-    user.token = user.generate_auth_token()
-    user.raw_password = 'password'
-    yield user
-    # user.delete()
+def user_employer(flask_app):
+    with flask_app.app_context():
+        user = User(
+            username='test_employer',
+            password='password',
+            credit_card='4532954356226826',
+            role=Roles.employer.value,
+        )
+        user.save()
+        user.token = user.generate_auth_token()
+        user.raw_password = 'password'
+        yield user
+        user.delete()
