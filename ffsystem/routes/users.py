@@ -45,3 +45,28 @@ def get_user(user_id):
         return jsonify(user.to_dict()), 200
     else:
         raise NotFound('User not found.')
+
+
+@users_bp.route('/<int:user_id>', methods=['PUT'])
+@token_auth
+@extract_json(allowed_keys={'password', 'credit_card'})
+@role_required(Roles.admin.value)
+def update_user(json_data, user_id):
+    user = User.qeury.filter_by(id=user_id)
+    if user:
+        user.update(**json_data)
+        return jsonify(user.to_dict()), 200
+    else:
+        raise NotFound('User not found.')
+
+
+@users_bp.route('/<int:user_id>', methods=['DELETE'])
+@token_auth
+@role_required(Roles.admin.value)
+def update_user(user_id):
+    user = User.qeury.filter_by(id=user_id)
+    if user:
+        user.delete()
+        return jsonify(message='Success.'), 200
+    else:
+        raise NotFound('User not found.')
