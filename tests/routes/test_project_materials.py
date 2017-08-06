@@ -41,8 +41,8 @@ def test_list_project_materials(client, project_materials, user_lancer):
     assert resp.json[0]['fileName'] == project_materials.file_name
 
 
-def test_delete_project_materials(client, project, user_admin,
-                                  project_materials):
+def test_delete_project_material(client, project, user_admin,
+                                 project_materials):
     resp = client.delete(
         project_materials_url % project.id + str(project_materials.id),
         headers={'token': user_admin.token}

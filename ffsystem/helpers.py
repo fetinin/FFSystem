@@ -42,9 +42,13 @@ def role_required(*allowed_roles):
 
 
 def extract_json(allowed_keys=None):
+    """
+    Decorator that extracts json from request and checks that it
+    contains only allowed keys. Pass parsed json into function kwargs.
+    """
 
     if not allowed_keys:
-        allowed_keys = []
+        allowed_keys = set()
 
     def decorator(func):
         @functools.wraps(func)
@@ -57,7 +61,9 @@ def extract_json(allowed_keys=None):
                 raise BadRequest("JSON map expected.")
             json = convert_keys_to_snake(json)
             check_for_not_allowed_keys(json, allowed_keys)
-            return func(json, *args, **kwargs)
+
+            kwargs['json_data'] = json
+            return func(*args, **kwargs)
 
         return wrapper
 

@@ -38,7 +38,7 @@ def delete_project_material(project_id, material_id):
     pm = ProjectMaterials.query.filter_by(id=material_id,
                                           project_fk=project_id).first()
     if not pm:
-        raise NotFound("Project not found.")
+        raise NotFound("Project materials not found.")
     else:
         pm.delete()
     return jsonify(message='Success.'), 200

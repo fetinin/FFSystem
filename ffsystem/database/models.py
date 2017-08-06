@@ -171,7 +171,7 @@ class ProjectComments(DBManager, ValidatorMixin, db.Model):
     }
 
     id = db.Column(db.Integer, primary_key=True)
-    crated_at = db.Column(db.DateTime(timezone=True), default=sql_func.now())
+    created_at = db.Column(db.DateTime(timezone=True), default=sql_func.now())
     last_update = db.Column(db.DateTime(timezone=True), onupdate=sql_func.now())
 
     comment = db.Column(db.Text, nullable=False)
@@ -183,8 +183,18 @@ class ProjectComments(DBManager, ValidatorMixin, db.Model):
         db.ForeignKey('project.id', ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
-    commentator_fk = db.Column(
+    user_id = db.Column(
         db.Integer,
         db.ForeignKey('user.id', ondelete="SET NULL", onupdate="CASCADE"),
-        nullable=False,
+        nullable=True,
     )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'comment': self.comment,
+            'createdAt': str(self.created_at),
+            'lastUpdate': str(self.last_update),
+            'projectId': self.project_fk,
+            'userId': self.user_id,
+        }
