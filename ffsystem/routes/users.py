@@ -1,4 +1,4 @@
-from flask import jsonify, Blueprint
+from flask import jsonify, Blueprint, g
 from werkzeug.exceptions import BadRequest, NotFound
 
 from ffsystem.database.enums import Roles
@@ -70,3 +70,10 @@ def delete_user(user_id):
         return jsonify(message='Success.'), 200
     else:
         raise NotFound('User not found.')
+
+
+@users_bp.route('/me', methods=['DELETE'])
+@token_auth
+def get_current_user():
+    user = g.user
+    return jsonify(user.to_dict()), 200

@@ -1,6 +1,6 @@
 import functools
 
-from flask import request
+from flask import request, g
 from werkzeug.exceptions import Unauthorized, Forbidden, BadRequest
 
 from ffsystem.database.models import User
@@ -10,7 +10,7 @@ import re
 def token_auth(func):
     """
     Decorator that adds token verification and
-    puts user into route function.
+    puts user into route function. Adds user to g object.
     """
 
     @functools.wraps(func)
@@ -19,6 +19,7 @@ def token_auth(func):
         user = User.get_by_auth_token(token)
         if not user:
             raise Unauthorized("Invalid token.")
+        g.user = user
         return func(*args, **kwargs)
 
     return wrapper
@@ -30,8 +31,11 @@ def role_required(*allowed_roles):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            token = request.headers.get('token', '')
-            user = User.get_by_auth_token(token)
+            if not getattr(g, 'user', None):
+                token = request.headers.get('token', '')
+                user = User.get_by_auth_token(token)
+            else:
+                user = g.user
             if user.role.value not in allowed_roles:
                 raise Forbidden("You don't have proper role.")
             return func(*args, **kwargs)
