@@ -34,6 +34,7 @@ class User(ValidatorMixin, DBManager, db.Model):
         'role': validators.is_role,
         'credit_card': validators.is_credit_card,
         'avatar_base64': validators.is_base64string,
+        'approved': validators.is_bool,
     }
 
     id = db.Column(db.Integer, primary_key=True)
@@ -45,7 +46,6 @@ class User(ValidatorMixin, DBManager, db.Model):
     credit_card = db.Column(db.String(25), nullable=False)
     avatar_base64 = db.Column(db.String(255))
     approved = db.Column(db.Boolean, default=False)
-    deleted = db.Column(db.Boolean, default=False)
 
     def to_dict(self):
         return {
@@ -53,6 +53,7 @@ class User(ValidatorMixin, DBManager, db.Model):
             'role': self.role.value,
             'creditCard': self.credit_card,
             'avatarBase64': self.avatar_base64,
+            'approved': self.approved,
         }
 
     @hybrid_property

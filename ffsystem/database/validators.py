@@ -150,3 +150,12 @@ def is_base64string(value: str) -> (bool, str):
                       "encodable."
 
     return True, SUCCESS_VALIDATION_MSG
+
+
+def is_bool(value: str) -> (bool, str):
+    if isinstance(value, bool):
+        return True, SUCCESS_VALIDATION_MSG
+    if isinstance(value, str):
+        if value.lower() in ('true', 'false'):
+            return True, SUCCESS_VALIDATION_MSG
+    return False, "Should be True or False."
