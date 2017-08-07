@@ -63,7 +63,7 @@ def update_user(json_data, user_id):
 @users_bp.route('/<int:user_id>', methods=['DELETE'])
 @token_auth
 @role_required(Roles.admin.value)
-def update_user(user_id):
+def delete_user(user_id):
     user = User.qeury.filter_by(id=user_id)
     if user:
         user.delete()
