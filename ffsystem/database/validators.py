@@ -1,5 +1,8 @@
+import base64
 import re
 import datetime
+
+import binascii
 
 from ffsystem.database.enums import Roles, Statuses
 
@@ -137,3 +140,13 @@ def is_archive(value: str) -> (bool, str):
     else:
         return False, f"Invalid format. Please upload one of these: " \
                       f"{', '.join(supported_formats)}."
+
+
+def is_base64string(value: str) -> (bool, str):
+    try:
+        base64.decodebytes(value)
+    except binascii.Error:
+        return False, "Invalid format. String should be urlsafe base64 " \
+                      "encodable."
+
+    return True, SUCCESS_VALIDATION_MSG

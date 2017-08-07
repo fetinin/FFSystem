@@ -33,7 +33,7 @@ class User(ValidatorMixin, DBManager, db.Model):
         'password': validators.is_password,
         'role': validators.is_role,
         'credit_card': validators.is_credit_card,
-        'avatar_link': validators.is_link,
+        'avatar_base64': validators.is_base64string,
     }
 
     id = db.Column(db.Integer, primary_key=True)
@@ -43,7 +43,7 @@ class User(ValidatorMixin, DBManager, db.Model):
     _password_hash = db.Column(db.String(128), nullable=False)
     role = db.Column(db.Enum(Roles), default=Roles.lancer.value)
     credit_card = db.Column(db.String(25), nullable=False)
-    avatar_link = db.Column(db.String(255))
+    avatar_base64 = db.Column(db.String(255))
     approved = db.Column(db.Boolean, default=False)
     deleted = db.Column(db.Boolean, default=False)
 
@@ -52,7 +52,7 @@ class User(ValidatorMixin, DBManager, db.Model):
             'username': self.username,
             'role': self.role.value,
             'creditCard': self.credit_card,
-            'avatarLink': self.avatar_link,
+            'avatarBase64': self.avatar_base64,
         }
 
     @hybrid_property
