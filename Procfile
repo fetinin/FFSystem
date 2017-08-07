@@ -1,1 +1,1 @@
-web: gunicorn ffsystem/wsgi:app --log-file -
+web: gunicorn ffsystem.wsgi:json_app --log-file -
