@@ -72,7 +72,7 @@ def delete_user(user_id):
         raise NotFound('User not found.')
 
 
-@users_bp.route('/me', methods=['DELETE'])
+@users_bp.route('/me', methods=['GET'])
 @token_auth
 def get_current_user():
     user = g.user
