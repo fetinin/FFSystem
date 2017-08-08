@@ -5,7 +5,7 @@ from werkzeug.exceptions import HTTPException
 
 from ffsystem.config import CONF
 from ffsystem.database import db
-from ffsystem.routes import blueprints
+from ffsystem.api import blueprints
 
 __all__ = ['create_app', 'make_json_app']
 
