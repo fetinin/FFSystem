@@ -3,7 +3,9 @@ from werkzeug.exceptions import BadRequest, NotFound
 
 from ffsystem.database.enums import Roles
 from ffsystem.database.models import Project
-from ffsystem.helpers import token_auth, role_required, extract_json
+from ffsystem.helpers import token_auth, role_required, extract_json, \
+    format_dict_diff
+from ffsystem.bots.telegram_bot import telebot_ffs_group as ffs_bot
 
 projects_bp = Blueprint('projects', __name__, url_prefix='/api/projects')
 
@@ -30,6 +32,7 @@ def create_project(json_data):
     except ValueError as err:
         raise BadRequest(str(err))
     project.save()
+    ffs_bot.send_msg(f"Появился заказ '{project.name}'!")
     return jsonify(project.to_dict()), 201
 
 
@@ -48,6 +51,7 @@ def get_project(id):
 @extract_json(allowed_keys=allowed_project_keys)
 def update_project(json_data, id):
     project = Project.query.filter_by(id=id).first()
+    old_project_info = project.to_dict()
     if not project:
         raise NotFound("Project not found.")
     else:
@@ -55,6 +59,9 @@ def update_project(json_data, id):
             project.update(**json_data)
         except AttributeError as err:
             raise BadRequest(str(err))
+    updated_info = "\n\t".join(format_dict_diff(old_project_info, json_data))
+    ffs_bot.send_msg(f"Заказ {project.name} обновился. Новая инфа: "
+                     f"<pre>{updated_info}.</pre>", parse_mode='html')
     return jsonify(project.to_dict()), 200
 
 

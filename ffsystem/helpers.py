@@ -99,3 +99,15 @@ def convert_keys_to_snake(d: dict) -> dict:
 
 _underscorer1 = re.compile(r'(.)([A-Z][a-z]+)')
 _underscorer2 = re.compile('([a-z0-9])([A-Z])')
+
+
+def format_dict_diff(old_dict: dict, updated_values: dict) -> dict(tuple()):
+    """
+    Represent value diff between two dicts.
+
+    Example output: ["key1: oldValue -> newValue", "name: John -> Kenny"]
+    """
+    return [
+        f"{str(key).title()}: {old_dict[key]} -> {updated_values[key]}"
+        for key in updated_values.keys()
+    ]
